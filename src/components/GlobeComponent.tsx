@@ -18,7 +18,7 @@ const GlobeComponent: React.FC = () => {
   const globeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return; // اطمینان از اجرا فقط در سمت کلاینت
+    if (typeof window === 'undefined') return;
 
     const currentRef = globeRef.current;
     if (!currentRef) return;
@@ -36,23 +36,17 @@ const GlobeComponent: React.FC = () => {
         const world = Globe()(currentRef) as ReturnType<typeof Globe>;
 
         world
-          .globeImageUrl(
-            "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-          )
-          .backgroundImageUrl(
-            "//unpkg.com/three-globe/example/img/night-sky.png"
-          )
+          .globeImageUrl("")
+          .backgroundImageUrl("")
+          .backgroundColor("rgba(255, 255, 255, 0.15)")  // بدون تصویر زمینه برای کره زمین
           .lineHoverPrecision(0)
           .polygonsData(
             countries.features.filter((d) => d.properties?.ISO_A2 !== "AQ")
           )
           .polygonAltitude(0.06)
-          .polygonCapColor((feat: object) => {
-            const country = feat as CountryFeature;
-            return colorScale(getVal(country));
-          })
-          .polygonSideColor(() => "rgba(0, 100, 0, 0.15)")
-          .polygonStrokeColor(() => "#111")
+          .polygonCapColor(() => "white")  // تنظیم رنگ سفید برای کشورها
+          .polygonSideColor(() => "#0085D426")
+          .polygonStrokeColor(() => "black")  // تنظیم رنگ سیاه برای مرز کشورها
           .polygonLabel((data: object) => {
             const country = data as CountryFeature;
             const properties = country.properties;
@@ -60,9 +54,9 @@ const GlobeComponent: React.FC = () => {
             const countryFlagUrl = `https://flagcdn.com/w320/${properties.ISO_A2.toLowerCase()}.png`;
             return `
               <div style="text-align:center">
-                <img src="${countryFlagUrl}" alt="Flag of ${properties.ADMIN}" style="width: 50px; height: 30px; margin-bottom: 5px;" />
+                <img src="${countryFlagUrl}" alt="Flag of ${properties.ADMIN}" style="width: 50px; height: 30px; margin-bottom: 2px;" />
                 <br />
-                <b>${properties.ADMIN} (${properties.ISO_A2})</b> <br />
+                <b className="font-bold text-lg text-white">${properties.ADMIN} (${properties.ISO_A2})</b> <br />
               </div>
             `;
           })
@@ -72,7 +66,7 @@ const GlobeComponent: React.FC = () => {
               .polygonAltitude((d: object) => (d === countryHover ? 0.12 : 0.06))
               .polygonCapColor((d: object) => {
                 const country = d as CountryFeature;
-                return d === countryHover ? "steelblue" : colorScale(getVal(country));
+                return d === countryHover ? "steelblue" : "white";  // رنگ کشور هنگام انتخاب به آبی تغییر می‌کند
               });
           })
           .onPolygonClick((clickedD: object) => {
@@ -88,7 +82,17 @@ const GlobeComponent: React.FC = () => {
       });
   }, []);
 
-  return <div ref={globeRef} style={{ width: "100%", height: "100vh" }} />;
+  return (
+    <div
+      ref={globeRef}
+      style={{
+        width: "100%",
+        height: "100vh",
+        background: "#f0f0f0",
+        overflow : "hidden"
+      }}
+    />
+  );
 };
 
 export default GlobeComponent;
