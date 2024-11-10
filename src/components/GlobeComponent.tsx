@@ -66,7 +66,7 @@ const GlobeComponent: React.FC = () => {
             world
               .polygonAltitude((d: object) => (d === countryHover ? 0.12 : 0.06))
               .polygonCapColor((d: object) => {
-                return d === countryHover ? "#0085D426" : "white";  // رنگ کشور هنگام انتخاب به آبی تغییر می‌کند
+                return d === countryHover ? "steelblue" : "white";  // رنگ کشور هنگام انتخاب به آبی تغییر می‌کند
               });
           })
           .onPolygonClick((clickedD: object) => {
