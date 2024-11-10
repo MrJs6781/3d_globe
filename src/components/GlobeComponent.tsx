@@ -3,28 +3,39 @@
 import { useEffect, useRef } from "react";
 import Globe from "globe.gl";
 import * as d3 from "d3";
-
-// برای استفاده از نوع GeoJSON
 import * as GeoJSON from "geojson";
+
+interface CountryProperties {
+  GDP_MD_EST?: number;
+  POP_EST?: number;
+  ISO_A2: string;
+  ADMIN: string;
+}
+
+type CountryFeature = GeoJSON.Feature<GeoJSON.Geometry, CountryProperties>;
 
 const GlobeComponent: React.FC = () => {
   const globeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return; // اطمینان از اجرا فقط در سمت کلاینت
+
     const currentRef = globeRef.current;
-    if (!currentRef) return; // بررسی اینکه آیا `globeRef.current` مقداردهی شده است یا خیر
+    if (!currentRef) return;
 
     const colorScale = d3.scaleSequentialSqrt(d3.interpolateYlOrRd);
-    const getVal = (feat: any) =>
-      feat.properties.GDP_MD_EST / Math.max(1e5, feat.properties.POP_EST);
+    const getVal = (feat: CountryFeature) =>
+      (feat.properties?.GDP_MD_EST ?? 0) / Math.max(1e5, feat.properties?.POP_EST ?? 1);
 
     fetch("/data/ne_110m_admin_0_countries.geojson")
       .then((res) => res.json())
-      .then((countries: GeoJSON.FeatureCollection) => {
+      .then((countries: GeoJSON.FeatureCollection<GeoJSON.Geometry, CountryProperties>) => {
         const maxVal = Math.max(...countries.features.map(getVal));
         colorScale.domain([0, maxVal]);
 
-        const world = Globe()(currentRef)
+        const world = Globe()(currentRef) as ReturnType<typeof Globe>;
+
+        world
           .globeImageUrl(
             "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
           )
@@ -33,16 +44,19 @@ const GlobeComponent: React.FC = () => {
           )
           .lineHoverPrecision(0)
           .polygonsData(
-            countries.features.filter((d: any) => d.properties.ISO_A2 !== "AQ")
+            countries.features.filter((d) => d.properties?.ISO_A2 !== "AQ")
           )
           .polygonAltitude(0.06)
-          .polygonCapColor((feat: any) => colorScale(getVal(feat)))
+          .polygonCapColor((feat: object) => {
+            const country = feat as CountryFeature;
+            return colorScale(getVal(country));
+          })
           .polygonSideColor(() => "rgba(0, 100, 0, 0.15)")
           .polygonStrokeColor(() => "#111")
-          .polygonLabel((data: any) => {
-            // console.log(data);
-            const properties = data.properties;
-            if (!properties) return ""; // در صورتی که properties موجود نباشد، محتویات را خالی می‌کنیم
+          .polygonLabel((data: object) => {
+            const country = data as CountryFeature;
+            const properties = country.properties;
+            if (!properties) return "";
             const countryFlagUrl = `https://flagcdn.com/w320/${properties.ISO_A2.toLowerCase()}.png`;
             return `
               <div style="text-align:center">
@@ -52,18 +66,23 @@ const GlobeComponent: React.FC = () => {
               </div>
             `;
           })
-          .onPolygonHover((hoverD: any) =>
+          .onPolygonHover((hoverD: object | null) => {
+            const countryHover = hoverD as CountryFeature | null;
             world
-              .polygonAltitude((d: any) => (d === hoverD ? 0.12 : 0.06))
-              .polygonCapColor((d: any) =>
-                d === hoverD ? "steelblue" : colorScale(getVal(d))
-              )
-          )
-          .onPolygonClick((clickedD: any) => {
-            // وقتی روی یک کشور کلیک می‌شود، اطلاعات آن کشور را چاپ می‌کنیم
-            console.log(
-              `کلیک بر روی کشور: ${clickedD.properties.ADMIN} (${clickedD.properties.ISO_A2})`
-            );
+              .polygonAltitude((d: object) => (d === countryHover ? 0.12 : 0.06))
+              .polygonCapColor((d: object) => {
+                const country = d as CountryFeature;
+                return d === countryHover ? "steelblue" : colorScale(getVal(country));
+              });
+          })
+          .onPolygonClick((clickedD: object) => {
+            const countryClicked = clickedD as CountryFeature;
+            const properties = countryClicked.properties;
+            if (properties) {
+              console.log(
+                `کلیک بر روی کشور: ${properties.ADMIN} (${properties.ISO_A2})`
+              );
+            }
           })
           .polygonsTransitionDuration(300);
       });
