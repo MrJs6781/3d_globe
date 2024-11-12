@@ -45,20 +45,19 @@ const GlobeComponent: React.FC = () => {
             countries.features.filter((d) => d.properties?.ISO_A2 !== "AQ")
           )
           .polygonAltitude(0.06)
-          .polygonCapColor(() => "white")  // تنظیم رنگ سفید برای کشورها
+          .polygonCapColor(() => "#F4F4F4")  // تنظیم رنگ سفید برای کشورها
           .polygonSideColor(() => "#0085D426")
-          .polygonStrokeColor(() => "black")  // تنظیم رنگ سیاه برای مرز کشورها
+          .polygonStrokeColor(() => "#C2C2C2")  // تنظیم رنگ سیاه برای مرز کشورها
           .polygonLabel((data: object) => {
             const country = data as CountryFeature;
             const properties = country.properties;
             if (!properties) return "";
-            const countryFlagUrl = `https://flagcdn.com/w320/${properties.ISO_A2.toLowerCase()}.png`;
+            const countryFlagUrl = `https://GlobalArtInc.github.io/round-flags/flags/${properties.ISO_A2.toLowerCase()}.svg`;
             return `
-              <div style="text-align:center">
-                <img src="${countryFlagUrl}" alt="Flag of ${properties.ADMIN}" style="width: 50px; height: 30px; margin-bottom: 2px;" />
-                <br />
-                <b className="font-bold text-lg text-white">${properties.ADMIN} (${properties.ISO_A2})</b> <br />
-              </div>
+              <span className="w-[50px] flex items-center justify-start gap-1" style="display:flex;align-items:center;gap:8px">
+                <img src="${countryFlagUrl}" alt="Flag of ${properties.ADMIN}" style="width: 50px; height: 50px; margin-bottom: 5px;" />
+                <p style="color:black;font-size:18px;font-weight:600;">${properties.ADMIN} (${properties.ISO_A2})</p>
+              </span>
             `;
           })
           .onPolygonHover((hoverD: object | null) => {
