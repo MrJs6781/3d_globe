@@ -37,7 +37,7 @@ const GlobeComponent: React.FC = () => {
 
         world
           // استفاده از یک تصویر با رنگ آبی ساده برای سطح کره زمین
-          .globeImageUrl("//unpkg.com/three-globe/example/img/earth-day.jpg") // اضافه کردن یک تصویر آبی در پوشه public/images/blue-ocean.jpg
+          .globeImageUrl("/Globle-Gray.png") // اضافه کردن یک تصویر آبی در پوشه public/images/blue-ocean.jpg
           .backgroundImageUrl("")  // اگر پس‌زمینه‌ای دیگر نمی‌خواهید
           .backgroundColor("rgba(255, 255, 255, 0.15)")  // تنظیم رنگ دلخواه برای پس‌زمینه آسمان
           .lineHoverPrecision(0)
@@ -66,7 +66,7 @@ const GlobeComponent: React.FC = () => {
             world
               .polygonAltitude((d: object) => (d === countryHover ? 0.12 : 0.06))
               .polygonCapColor((d: object) => {
-                return d === countryHover ? "steelblue" : "white";  // رنگ کشور هنگام انتخاب به آبی تغییر می‌کند
+                return d === countryHover ? "#0085D4" : "white";  // رنگ کشور هنگام انتخاب به آبی تغییر می‌کند
               });
           })
           .onPolygonClick((clickedD: object) => {
